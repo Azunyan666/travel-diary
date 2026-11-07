@@ -1,0 +1,12 @@
+export type IconName =
+  | 'map'
+  | 'book'
+  | 'image'
+  | 'user'
+  | 'camera'
+  | 'pin'
+  | 'download'
+  | 'info'
+  | 'plus'
+  | 'chevron'
+  | 'code'

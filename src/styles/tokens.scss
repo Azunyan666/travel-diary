@@ -1,0 +1,52 @@
+/* 行迹 · 设计 token（对齐 docs/DESIGN.md） */
+
+:root {
+  /* 表面 */
+  --paper: #f7f3ea;
+  --paper-deep: #efe8d9;
+  --surface: #ffffff;
+
+  /* 文字 */
+  --ink: #1e211f;
+  --body: #414743;
+  --muted: #77807a;
+  --muted-soft: #a3aaa5;
+
+  /* 线条 */
+  --line: #e5dfd1;
+  --line-strong: #cfc7b6;
+
+  /* 品牌 */
+  --forest: #2f5d50;
+  --forest-deep: #24483e;
+  --forest-soft: #e4ede8;
+  --clay: #de6a3e;
+  --clay-soft: #fbede6;
+  --ochre: #c08a3e;
+  --lake: #5e8a93;
+  --moss: #7c8f6b;
+
+  /* 语义 */
+  --success: #4f7a5c;
+  --warning: #c08a3e;
+  --danger: #c94f3d;
+
+  /* 圆角 */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-full: 999px;
+
+  /* 阴影 */
+  --shadow-card: 0 1px 2px rgba(31, 36, 33, 0.04), 0 6px 18px rgba(31, 36, 33, 0.05);
+  --shadow-float: 0 2px 6px rgba(31, 36, 33, 0.06), 0 12px 32px rgba(31, 36, 33, 0.1);
+
+  /* 字体 */
+  --serif: 'Noto Serif SC', 'Songti SC', 'STSong', 'Source Han Serif SC', serif;
+  --sans: 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', system-ui, -apple-system, sans-serif;
+
+  /* 布局 */
+  --page-width: 520px;
+  --tabbar-h: 56px;
+}
