@@ -10,3 +10,6 @@ export type IconName =
   | 'plus'
   | 'chevron'
   | 'code'
+  | 'close'
+  | 'edit'
+  | 'trash'

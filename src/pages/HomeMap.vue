@@ -1,18 +1,25 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import AppIcon from '@/components/AppIcon.vue'
-import { toast } from '@/lib/toast'
+import { useTripsStore } from '@/stores/trips'
+import { usePhotosStore } from '@/stores/photos'
+
+const router = useRouter()
+const trips = useTripsStore()
+const photos = usePhotosStore()
 
 const year = new Date().getFullYear()
 
-const stats = [
-  { label: '省份', value: 0 },
-  { label: '城市', value: 0 },
-  { label: '照片', value: 0 },
-]
-
-function start(): void {
-  toast('记录功能正在开发中')
+function uniqueCount(values: Array<string | undefined>): number {
+  return new Set(values.filter(Boolean)).size
 }
+
+const stats = computed(() => [
+  { label: '省份', value: uniqueCount(trips.trips.map((trip) => trip.province)) },
+  { label: '城市', value: uniqueCount(trips.trips.map((trip) => trip.city)) },
+  { label: '照片', value: photos.photos.length },
+])
 </script>
 
 <template>
@@ -54,7 +61,9 @@ function start(): void {
           <p class="callout-sub">写下当时的心情和趣事，照片就有了记忆。</p>
         </div>
       </div>
-      <button class="btn-primary" type="button" @click="start">开始记录</button>
+      <button class="btn-primary" type="button" @click="router.push('/trip/new')">
+        开始记录
+      </button>
     </section>
   </main>
 </template>
@@ -162,7 +171,6 @@ function start(): void {
   background: var(--forest);
 }
 
-/* 统计 */
 .stats {
   display: flex;
   margin-top: 16px;
@@ -194,7 +202,6 @@ function start(): void {
   color: var(--muted);
 }
 
-/* 引导卡 */
 .callout {
   margin-top: 16px;
   padding: 18px;

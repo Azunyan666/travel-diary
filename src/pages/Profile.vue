@@ -1,15 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AppIcon from '@/components/AppIcon.vue'
 import { toast } from '@/lib/toast'
+import { daysBetween } from '@/lib/format'
+import { useTripsStore } from '@/stores/trips'
+import { usePhotosStore } from '@/stores/photos'
 import type { IconName } from '@/types/icons'
 
 const year = new Date().getFullYear()
+const trips = useTripsStore()
+const photos = usePhotosStore()
 
-const stats = [
-  { label: '次旅行', value: 0 },
-  { label: '天在路上', value: 0 },
-  { label: '张照片', value: 0 },
-]
+const stats = computed(() => [
+  { label: '次旅行', value: trips.trips.length },
+  {
+    label: '天在路上',
+    value: trips.trips.reduce((total, trip) => total + daysBetween(trip.startDate, trip.endDate), 0),
+  },
+  { label: '张照片', value: photos.photos.length },
+])
 
 const menus: Array<{ label: string; icon: IconName; action: 'backup' | 'about' | 'repo' }> = [
   { label: '数据备份与导出', icon: 'download', action: 'backup' },
@@ -18,8 +27,8 @@ const menus: Array<{ label: string; icon: IconName; action: 'backup' | 'about' |
 ]
 
 function onMenu(action: 'backup' | 'about' | 'repo'): void {
-  if (action === 'backup') toast('备份功能将随照片模块一起上线')
-  else if (action === 'about') toast('行迹 v0.1.0 · 本地优先的旅行日记')
+  if (action === 'backup') toast('备份功能将随后续版本上线')
+  else if (action === 'about') toast('行迹 v0.2.0 · 本地优先的旅行日记')
 }
 </script>
 
@@ -34,8 +43,10 @@ function onMenu(action: 'backup' | 'about' | 'repo'): void {
     <section class="identity card">
       <span class="avatar" aria-hidden="true">行</span>
       <div class="identity-body">
-        <p class="name">还没有起名字</p>
-        <p class="since">第一段旅程还没开始</p>
+        <p class="name">{{ trips.trips.length ? '一直在路上' : '还没有起名字' }}</p>
+        <p class="since">
+          {{ trips.trips.length ? `记录了 ${trips.trips.length} 次旅行` : '第一段旅程还没开始' }}
+        </p>
       </div>
     </section>
 
@@ -74,7 +85,7 @@ function onMenu(action: 'backup' | 'about' | 'repo'): void {
       </template>
     </nav>
 
-    <p class="version">行迹 v0.1.0 · 数据只保存在这台设备</p>
+    <p class="version">行迹 v0.2.0 · 数据只保存在这台设备</p>
   </main>
 </template>
 

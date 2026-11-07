@@ -26,6 +26,10 @@ const ICONS: Record<IconName, string> = {
   plus: '<path d="M12 5.5v13M5.5 12h13"/>',
   chevron: '<path d="m9 5 7 7-7 7"/>',
   code: '<path d="m8.5 8-4.5 4 4.5 4"/><path d="m15.5 8 4.5 4-4.5 4"/><path d="m13 5-2 14"/>',
+  close: '<path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/>',
+  edit: '<path d="M4.5 19.5h4l10-10a2.1 2.1 0 0 0-3-3l-10 10v3Z"/><path d="m13.5 6.5 3 3"/>',
+  trash:
+    '<path d="M5 7h14M9.5 7V5.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V7M7 7l.9 12a1 1 0 0 0 1 .9h6.2a1 1 0 0 0 1-.9L17 7"/>',
 }
 
 const markup = computed(
