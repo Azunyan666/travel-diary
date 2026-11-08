@@ -29,6 +29,11 @@ export const useTripsStore = defineStore('trips', () => {
     loaded.value = true
   }
 
+  async function refresh(): Promise<void> {
+    trips.value = await getAllTrips()
+    loaded.value = true
+  }
+
   function get(id: string): Trip | undefined {
     return trips.value.find((trip) => trip.id === id)
   }
@@ -80,5 +85,5 @@ export const useTripsStore = defineStore('trips', () => {
     trips.value = trips.value.filter((trip) => trip.id !== id)
   }
 
-  return { trips, loaded, ordered, init, get, days, create, update, remove }
+  return { trips, loaded, ordered, init, refresh, get, days, create, update, remove }
 })

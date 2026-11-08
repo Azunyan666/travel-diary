@@ -5,6 +5,7 @@ import Album from '@/pages/Album.vue'
 import Profile from '@/pages/Profile.vue'
 import TripEdit from '@/pages/TripEdit.vue'
 import TripDetail from '@/pages/TripDetail.vue'
+import Backup from '@/pages/Backup.vue'
 
 const router = createRouter({
   // 用 hash 模式：GitHub Pages 是静态托管，刷新子路径不会 404
@@ -17,6 +18,7 @@ const router = createRouter({
     { path: '/trip/new', name: 'trip-new', component: TripEdit },
     { path: '/trip/:id/edit', name: 'trip-edit', component: TripEdit },
     { path: '/trip/:id', name: 'trip-detail', component: TripDetail },
+    { path: '/backup', name: 'backup', component: Backup },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
   scrollBehavior: () => ({ top: 0 }),

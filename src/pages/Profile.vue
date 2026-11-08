@@ -1,15 +1,33 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AppIcon from '@/components/AppIcon.vue'
 import { toast } from '@/lib/toast'
-import { daysBetween } from '@/lib/format'
+import { daysBetween, fmtStamp } from '@/lib/format'
+import { getMeta } from '@/lib/db'
+import { loadDemoData } from '@/lib/demo'
+import { APP_VERSION } from '@/lib/version'
 import { useTripsStore } from '@/stores/trips'
 import { usePhotosStore } from '@/stores/photos'
 import type { IconName } from '@/types/icons'
 
 const year = new Date().getFullYear()
+const router = useRouter()
 const trips = useTripsStore()
 const photos = usePhotosStore()
+const lastBackupAt = ref<number | undefined>()
+
+const needsBackup = computed(() => {
+  if (photos.photos.length < 10) return false
+  if (!lastBackupAt.value) return true
+  return Date.now() - lastBackupAt.value > 7 * 86400000
+})
+
+onMounted(async () => {
+  await trips.init()
+  await photos.init()
+  lastBackupAt.value = await getMeta<number>('lastBackupAt')
+})
 
 const stats = computed(() => [
   { label: '次旅行', value: trips.trips.length },
@@ -20,16 +38,37 @@ const stats = computed(() => [
   { label: '张照片', value: photos.photos.length },
 ])
 
-const menus: Array<{ label: string; icon: IconName; action: 'backup' | 'about' | 'repo' }> = [
+const menus: Array<{
+  label: string
+  icon: IconName
+  action: 'backup' | 'demo' | 'about' | 'repo'
+}> = [
   { label: '数据备份与导出', icon: 'download', action: 'backup' },
+  { label: '添加示例数据', icon: 'image', action: 'demo' },
   { label: '关于行迹', icon: 'info', action: 'about' },
   { label: '开源仓库', icon: 'code', action: 'repo' },
 ]
 
-function onMenu(action: 'backup' | 'about' | 'repo'): void {
-  if (action === 'backup') toast('备份功能将随后续版本上线')
-  else if (action === 'about') toast('行迹 v0.3.0 · 本地优先的旅行日记')
+function onMenu(action: 'backup' | 'demo' | 'about' | 'repo'): void {
+  if (action === 'backup') router.push('/backup')
+  else if (action === 'about') toast(`行迹 v${APP_VERSION} · 本地优先的旅行日记`)
+  else if (action === 'demo') void addDemo()
 }
+
+async function addDemo(): Promise<void> {
+  const ok = window.confirm('添加 3 次示例旅行和 7 张照片？只会新增，不会影响已有数据。')
+  if (!ok) return
+
+  const result = await loadDemoData()
+  await trips.refresh()
+  await photos.refresh()
+  toast(`已添加 ${result.trips} 次旅行、${result.photos} 张照片`)
+  if (result.trips || result.photos) router.push('/')
+}
+
+const lastBackupText = computed(() =>
+  lastBackupAt.value ? `上次备份 ${fmtStamp(lastBackupAt.value)}` : '还没有备份过',
+)
 </script>
 
 <template>
@@ -56,6 +95,15 @@ function onMenu(action: 'backup' | 'about' | 'repo'): void {
         <span class="stat-label">{{ s.label }}</span>
       </div>
     </section>
+
+    <button v-if="needsBackup" class="remind card" type="button" @click="router.push('/backup')">
+      <span class="remind-icon"><AppIcon name="download" :size="18" /></span>
+      <span class="remind-body">
+        <span class="remind-title">照片还没备份</span>
+        <span class="remind-sub">{{ photos.photos.length }} 张照片只在这台设备上 · {{ lastBackupText }}</span>
+      </span>
+      <AppIcon name="chevron" :size="16" />
+    </button>
 
     <nav class="menu card" aria-label="设置">
       <template v-for="(item, index) in menus" :key="item.label">
@@ -85,7 +133,7 @@ function onMenu(action: 'backup' | 'about' | 'repo'): void {
       </template>
     </nav>
 
-    <p class="version">行迹 v0.3.0 · 数据只保存在这台设备</p>
+    <p class="version">行迹 v{{ APP_VERSION }} · 数据只保存在这台设备</p>
   </main>
 </template>
 
@@ -202,5 +250,45 @@ function onMenu(action: 'backup' | 'about' | 'repo'): void {
   text-align: center;
   font-size: 11px;
   color: var(--muted-soft);
+}
+
+.remind {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.remind-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  background: var(--clay-soft);
+  color: var(--clay);
+  flex: none;
+}
+
+.remind-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.remind-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.remind-sub {
+  font-size: 11px;
+  color: var(--muted);
 }
 </style>

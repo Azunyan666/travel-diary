@@ -108,3 +108,12 @@ export async function setMeta(key: string, value: unknown): Promise<void> {
   const db = await getDB()
   await db.put('meta', value, key)
 }
+
+/* ---------- 维护 ---------- */
+
+/** 清空所有旅行与照片（覆盖导入前使用） */
+export async function clearAllData(): Promise<void> {
+  const db = await getDB()
+  await db.clear('trips')
+  await db.clear('photos')
+}
