@@ -11,7 +11,7 @@
 
 **在线体验**：<https://azunyan666.github.io/travel-diary/>
 
-> 当前版本 **v0.4.0**：旅行记录、照片标注、按天时间线、相册、中国地图点亮、zip 备份恢复全部可用；示例数据一键就能看到效果（见 [路线图](./docs/ROADMAP.md)）。
+> 当前版本 **v0.4.1**：Web 端功能完整（记录、标注、地图、备份），并已通过 Capacitor 打包成 Android APK（见 [路线图](./docs/ROADMAP.md)）。
 
 ![行迹 · 足迹地图](docs/screenshots/home.png)
 
@@ -46,7 +46,8 @@
 | 中国地图点亮、点选省份、最近一次旅行标记 | ✅ v0.3.0 |
 | zip 备份导出、合并/覆盖导入、备份提醒 | ✅ v0.4.0 |
 | 示例数据（3 次旅行 / 7 张照片） | ✅ v0.4.0 |
-| 世界地图、年度回顾、Android APK | 📋 v0.5+ |
+| Android APK（Capacitor 套壳、品牌图标、自动出包） | ✅ v0.4.1 |
+| 世界地图、年度回顾 | 📋 v0.5+ |
 
 ## 技术栈
 
@@ -54,6 +55,7 @@
 - **Pinia** 状态管理，**Vue Router**（hash 模式，适配静态托管）
 - **IndexedDB**（[idb](https://github.com/jakearchibald/idb)）本地存储，照片以 Blob 形式保存
 - **PWA**（[vite-plugin-pwa](https://vite-pwa-org.netlify.app/)）：可安装、可离线
+- **Capacitor**：同一份 Web 代码打包 Android APK
 - 设计系统：暖纸底 / 深林绿 / 赤陶橙，见 [docs/DESIGN.md](./docs/DESIGN.md)
 
 ## 快速开始
@@ -76,18 +78,31 @@ npm run build      # 类型检查 + 生产构建
 npm run preview    # 预览构建产物
 ```
 
+## Android 安装
+
+Android 版是 Capacitor 套壳，和 Web 端共用同一份代码，数据同样只存在本地。
+
+- 从 [Releases](https://github.com/Azunyan666/travel-diary/releases) 下载最新 APK
+- 首次安装需要允许「安装未知来源应用」
+- 构建、签名与升级说明见 [docs/ANDROID.md](./docs/ANDROID.md)
+
+> 没有配置签名 secrets 时，Actions 产出的是 debug 包：可以安装试用，但签名每次不同，覆盖升级会失败（需要先卸载，数据会丢）。正式使用前请按文档配置 release 签名。
+
 ## 目录结构
 
 ```
 src/
-├─ pages/          页面（四个 Tab + 后续的详情页）
-├─ components/     通用组件（图标、导航、空状态、提示）
+├─ pages/          页面（四个 Tab + 详情/备份页）
+├─ components/     通用组件（图标、导航、地图、查看器、提示）
 ├─ router/         路由
 ├─ styles/         设计 token 与全局样式
-├─ lib/            与框架无关的逻辑（存储、图片、导出、提示）
+├─ lib/            与框架无关的逻辑（存储、图片、备份、地图、提示）
+├─ stores/         Pinia 状态
 ├─ types/          数据模型
-└─ data/           示例数据（后续的 Demo 模式）
-docs/              设计、数据模型、路线图
+└─ data/           示例数据
+android/           Capacitor 生成的 Android 工程
+capacitor.config.ts
+docs/              设计、数据模型、Android、路线图
 public/            静态资源、PWA 图标、地图 GeoJSON
 ```
 

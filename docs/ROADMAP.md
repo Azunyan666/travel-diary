@@ -34,6 +34,12 @@
 - 示例数据
 - 首次正式 Release（v0.4.0）
 
+## v0.4.1 · Android APK（已完成）
+
+- Capacitor 套壳与品牌图标
+- GitHub Actions 自动出包（tag → Release APK）
+- 正式签名流程（release.keystore + GitHub Secrets）
+
 ## v0.5.0 · 世界地图（可选）
 
 - 国家边界 GeoJSON 与切换
@@ -44,7 +50,6 @@
 - 稳定数据格式与迁移
 - 年度回顾长图
 - 足迹连线
-- Android APK（Capacitor）与 GitHub Releases
 
 ## 明确不做
 

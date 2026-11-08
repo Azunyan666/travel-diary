@@ -2,6 +2,16 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.4.1] - 2026-11-08
+
+### 新增
+
+- Capacitor Android 套壳：与 PWA 共用同一份 Web 代码，可安装成独立 App
+- 品牌启动图标（自适应图标 + 传统图标）与暖纸色启动图、状态栏
+- Android 自动出包工作流：推 `v*` 标签时构建 APK 并附到 GitHub Release
+- 正式签名支持：通过环境变量读取 `release.keystore`，未配置时回退 debug 签名
+- [docs/ANDROID.md](./docs/ANDROID.md)：构建、签名、升级与数据说明
+
 ## [0.4.0] - 2026-11-08
 
 ### 新增

@@ -10,7 +10,7 @@ A mobile-first travel diary that runs entirely in your browser. Import photos fr
 
 No account, no server, no tracking — everything is stored locally in IndexedDB and can be exported as a backup.
 
-> **Status: v0.4.0.** Trips, photo import with EXIF time/GPS, per-photo notes, day timeline, album, the China footprint map and zip backup/restore are ready. Demo data is one tap away — see the [roadmap](./docs/ROADMAP.md).
+> **Status: v0.4.1.** Web app is feature-complete (trips, photos, notes, day timeline, album, China map, zip backup) and ships as an Android APK via Capacitor — see the [roadmap](./docs/ROADMAP.md).
 
 ## Features
 
