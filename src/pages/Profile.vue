@@ -28,7 +28,7 @@ const menus: Array<{ label: string; icon: IconName; action: 'backup' | 'about' |
 
 function onMenu(action: 'backup' | 'about' | 'repo'): void {
   if (action === 'backup') toast('备份功能将随后续版本上线')
-  else if (action === 'about') toast('行迹 v0.2.0 · 本地优先的旅行日记')
+  else if (action === 'about') toast('行迹 v0.3.0 · 本地优先的旅行日记')
 }
 </script>
 
@@ -85,7 +85,7 @@ function onMenu(action: 'backup' | 'about' | 'repo'): void {
       </template>
     </nav>
 
-    <p class="version">行迹 v0.2.0 · 数据只保存在这台设备</p>
+    <p class="version">行迹 v0.3.0 · 数据只保存在这台设备</p>
   </main>
 </template>
 

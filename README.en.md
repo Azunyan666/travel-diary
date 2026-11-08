@@ -10,15 +10,15 @@ A mobile-first travel diary that runs entirely in your browser. Import photos fr
 
 No account, no server, no tracking — everything is stored locally in IndexedDB and can be exported as a backup.
 
-> **Status: v0.1.0 (skeleton).** The app shell, four tabs, PWA install and offline support are ready. Photo import, notes and the map are in progress — see the [roadmap](./docs/ROADMAP.md).
+> **Status: v0.3.0.** Trips, photo import with EXIF time/GPS, per-photo notes, day timeline, album and the China footprint map are ready. Backup/export is next — see the [roadmap](./docs/ROADMAP.md).
 
 ## Features
 
 - ✅ Mobile-first PWA: installable, works offline
 - ✅ Warm-paper design system (see [docs/DESIGN.md](./docs/DESIGN.md))
-- 🚧 Trips, photo import with EXIF time/GPS, thumbnails
-- 🚧 Notes under every photo
-- 🚧 Province / country map that lights up
+- ✅ Trips, photo import with EXIF time/GPS, thumbnails
+- ✅ Notes and tags under every photo
+- ✅ China province map that lights up as you travel
 - 📋 Export & import backups, world map, year-in-review
 
 ## Tech stack

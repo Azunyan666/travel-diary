@@ -1,6 +1,6 @@
 {
   "name": "travel-diary",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "行迹 — 给照片写故事，让足迹在地图上亮起来。",
   "license": "MIT",

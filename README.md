@@ -11,13 +11,13 @@
 
 **在线体验**：<https://azunyan666.github.io/travel-diary/>
 
-> 当前版本 **v0.2.0**：旅行 CRUD、照片导入、照片标注、按天时间线与相册瀑布流已经可用；中国地图点亮在开发中（见 [路线图](./docs/ROADMAP.md)）。
+> 当前版本 **v0.3.0**：旅行 CRUD、照片导入与标注、按天时间线、相册瀑布流、中国地图点亮都已可用；导出备份在开发中（见 [路线图](./docs/ROADMAP.md)）。
 
-![行迹 · 足迹页](docs/screenshots/home.png)
+![行迹 · 足迹地图](docs/screenshots/home.png)
 
-| 旅行时间线 | 照片标注 |
-|---|---|
-| ![时间线](docs/screenshots/timeline.png) | ![标注](docs/screenshots/viewer.png) |
+| 旅行时间线 | 照片标注 | 点省份 |
+|---|---|---|
+| ![时间线](docs/screenshots/timeline.png) | ![标注](docs/screenshots/viewer.png) | ![省份抽屉](docs/screenshots/map-sheet.png) |
 
 ---
 
@@ -41,9 +41,9 @@
 | 照片导入、EXIF 时间与 GPS、压缩、缩略图 | ✅ v0.2.0 |
 | 照片标注（灵感 / 趣事、标签、删除） | ✅ v0.2.0 |
 | 按天时间线、相册瀑布流 | ✅ v0.2.0 |
-| 中国地图点亮、点选省份 | 🚧 M3 |
+| 中国地图点亮、点选省份、最近一次旅行标记 | ✅ v0.3.0 |
 | 导出 / 导入备份 | 🚧 M4 |
-| 世界地图、年度回顾 | 📋 v0.3+ |
+| 世界地图、年度回顾 | 📋 v0.4+ |
 
 ## 技术栈
 
@@ -96,6 +96,12 @@ public/            静态资源、PWA 图标、地图 GeoJSON
 - 首次部署需要在仓库 **Settings → Pages → Build and deployment** 选择 **GitHub Actions**
 
 也可以部署到 Cloudflare Pages / Vercel / Netlify：构建命令 `npm run build`，输出目录 `dist`，注意把 `base` 改成对应路径。
+
+## 地图数据
+
+- `public/geo/china.json` 由公开的省级边界数据简化而来（34 个省级行政区，约 185KB），只保留名称、中心点与边界坐标
+- 地图用于个人足迹展示，不是标准地图；如需公开发布或商用，请使用带审图号的标准地图服务
+- 渲染全部在本地 canvas 完成，不请求在线瓦片服务，可离线使用
 
 ## 数据与隐私
 

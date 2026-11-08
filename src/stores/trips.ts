@@ -4,6 +4,7 @@ import type { Trip } from '@/types/models'
 import { deleteTripCascade, getAllTrips, putTrip } from '@/lib/db'
 import { newId } from '@/lib/id'
 import { daysBetween } from '@/lib/format'
+import { byStartDateDesc } from '@/lib/sort'
 
 export interface TripDraft {
   title: string
@@ -20,9 +21,7 @@ export const useTripsStore = defineStore('trips', () => {
   const loaded = ref(false)
 
   /** 按出发日期倒序 */
-  const ordered = computed(() =>
-    [...trips.value].sort((a, b) => (a.startDate < b.startDate ? 1 : -1)),
-  )
+  const ordered = computed(() => [...trips.value].sort(byStartDateDesc))
 
   async function init(): Promise<void> {
     if (loaded.value) return

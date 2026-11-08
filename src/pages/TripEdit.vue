@@ -26,7 +26,12 @@ const form = reactive<TripDraft>({
 
 onMounted(async () => {
   await trips.init()
-  if (!isEdit.value) return
+  if (!isEdit.value) {
+    // 从地图「记一次去这里的旅行」进来时，把省份带上
+    const province = route.query.province
+    if (typeof province === 'string' && province) form.province = province
+    return
+  }
 
   const trip = trips.get(editId.value)
   if (!trip) {
