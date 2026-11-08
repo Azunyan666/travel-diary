@@ -11,11 +11,13 @@
 
 **在线体验**：<https://azunyan666.github.io/travel-diary/>
 
-> 当前版本 **v0.2.0（开发中）**：旅行 CRUD 与照片导入已经可用（EXIF 时间 / GPS、压缩、缩略图、IndexedDB 持久化）；照片标注、按天时间线与地图点亮在开发中（见 [路线图](./docs/ROADMAP.md)）。
+> 当前版本 **v0.2.0**：旅行 CRUD、照片导入、照片标注、按天时间线与相册瀑布流已经可用；中国地图点亮在开发中（见 [路线图](./docs/ROADMAP.md)）。
 
 ![行迹 · 足迹页](docs/screenshots/home.png)
 
-![行迹 · 旅行日记](docs/screenshots/diary.png)
+| 旅行时间线 | 照片标注 |
+|---|---|
+| ![时间线](docs/screenshots/timeline.png) | ![标注](docs/screenshots/viewer.png) |
 
 ---
 
@@ -37,8 +39,8 @@
 | PWA 安装、离线打开 | ✅ v0.1.0 |
 | 旅行 CRUD（新建 / 编辑 / 删除） | ✅ v0.2.0 |
 | 照片导入、EXIF 时间与 GPS、压缩、缩略图 | ✅ v0.2.0 |
-| 照片标注（灵感 / 趣事） | 🚧 M2 |
-| 按天时间线、相册瀑布流 | 🚧 M2 |
+| 照片标注（灵感 / 趣事、标签、删除） | ✅ v0.2.0 |
+| 按天时间线、相册瀑布流 | ✅ v0.2.0 |
 | 中国地图点亮、点选省份 | 🚧 M3 |
 | 导出 / 导入备份 | 🚧 M4 |
 | 世界地图、年度回顾 | 📋 v0.3+ |
@@ -103,7 +105,7 @@ public/            静态资源、PWA 图标、地图 GeoJSON
 
 ## 路线图
 
-见 [docs/ROADMAP.md](./docs/ROADMAP.md)。下一个版本 v0.2.0 的目标是：旅行 CRUD + 照片导入 + 标注 + 按天时间线。
+见 [docs/ROADMAP.md](./docs/ROADMAP.md)。下一个版本 v0.3.0 的目标是：中国地图点亮 + 点选省份查看旅行。
 
 ## 贡献
 

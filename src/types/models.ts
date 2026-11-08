@@ -25,10 +25,13 @@ export interface Trip {
 export interface Photo {
   id: string
   tripId: string
-  /** 缩略图（约 400px，列表用） */
+  /** 缩略图（约 480px，列表用） */
   thumbnail: Blob
   /** 原图，详情页按需加载 */
   image?: Blob
+  /** 原图尺寸，用于瀑布流占位 */
+  width?: number
+  height?: number
   /** 拍摄时间（毫秒），来自 EXIF 或文件时间 */
   takenAt?: number
   lat?: number

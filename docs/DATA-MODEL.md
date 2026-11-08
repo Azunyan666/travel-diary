@@ -23,9 +23,10 @@
 |---|---|---|
 | `id` | string | `crypto.randomUUID()` |
 | `tripId` | string | 归属旅行 |
-| `thumbnail` | Blob | 约 400px 缩略图，列表只用它 |
-| `image` | Blob? | 原图，详情页按需加载 |
-| `takenAt` | number? | EXIF 时间，缺失时用文件时间 |
+| `thumbnail` | Blob | 约 480px 缩略图，列表只用它 |
+| `image` | Blob? | 原图（最长边 2048px JPEG），详情页按需加载 |
+| `width` / `height` | number? | 原图尺寸，用于瀑布流占位与比例 |
+| `takenAt` | number? | EXIF 时间，缺失时用文件时间；时间线按它分天 |
 | `lat` / `lng` | number? | EXIF GPS，可空 |
 | `place` | string? | 地点文案 |
 | `caption` | string? | 照片下的标注正文 |

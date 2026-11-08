@@ -4,14 +4,21 @@ import { useRoute, useRouter } from 'vue-router'
 import AppBar from '@/components/AppBar.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import PhotoLightbox from '@/components/PhotoLightbox.vue'
 import PhotoTile from '@/components/PhotoTile.vue'
+import PhotoViewer from '@/components/PhotoViewer.vue'
 import { useTripsStore } from '@/stores/trips'
 import { usePhotosStore } from '@/stores/photos'
 import { useObjectUrl } from '@/lib/useObjectUrl'
-import { daysBetween, fmtCN } from '@/lib/format'
+import { dateKey, daysBetween, daysFrom, fmtCN, fmtMD } from '@/lib/format'
 import { toast } from '@/lib/toast'
 import type { Photo } from '@/types/models'
+
+interface DayGroup {
+  key: string
+  title: string
+  meta: string
+  photos: Photo[]
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -29,9 +36,35 @@ const place = computed(() =>
 const cover = computed(() => list.value[0]?.thumbnail)
 const coverUrl = useObjectUrl(() => cover.value)
 
+const groups = computed<DayGroup[]>(() => {
+  const map = new Map<string, Photo[]>()
+  for (const photo of list.value) {
+    const key = dateKey(photo.takenAt) || 'unknown'
+    const bucket = map.get(key)
+    if (bucket) bucket.push(photo)
+    else map.set(key, [photo])
+  }
+
+  const result: DayGroup[] = []
+  for (const [key, items] of map.entries()) {
+    let title = key === 'unknown' ? '没有拍摄时间' : fmtMD(key)
+    if (key !== 'unknown' && trip.value) {
+      const offset = daysFrom(trip.value.startDate, key)
+      if (offset >= 0) title = `第 ${offset + 1} 天 · ${fmtMD(key)}`
+    }
+    result.push({ key, title, meta: `${items.length} 张`, photos: items })
+  }
+
+  return result.sort((a, b) => {
+    if (a.key === 'unknown') return 1
+    if (b.key === 'unknown') return -1
+    return a.key.localeCompare(b.key)
+  })
+})
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const progress = ref<{ done: number; total: number } | null>(null)
-const active = ref<Photo | null>(null)
+const activeIndex = ref<number | null>(null)
 
 onMounted(async () => {
   await trips.init()
@@ -44,6 +77,11 @@ onMounted(async () => {
 
 function pick(): void {
   fileInput.value?.click()
+}
+
+function openPhoto(photo: Photo): void {
+  const index = list.value.findIndex((item) => item.id === photo.id)
+  if (index >= 0) activeIndex.value = index
 }
 
 async function onFiles(event: Event): Promise<void> {
@@ -99,16 +137,32 @@ async function onFiles(event: Event): Promise<void> {
         </button>
       </div>
 
-      <div v-if="list.length" class="grid">
-        <button
-          v-for="photo in list"
-          :key="photo.id"
-          class="grid-item"
-          type="button"
-          @click="active = photo"
-        >
-          <PhotoTile :photo="photo" />
-        </button>
+      <div v-if="list.length" class="timeline">
+        <section v-for="group in groups" :key="group.key" class="day">
+          <header class="day-head">
+            <h2 class="day-title">{{ group.title }}</h2>
+            <span class="day-meta">{{ group.meta }}</span>
+          </header>
+
+          <div class="cards">
+            <button
+              v-for="photo in group.photos"
+              :key="photo.id"
+              class="card"
+              type="button"
+              @click="openPhoto(photo)"
+            >
+              <PhotoTile :photo="photo" :ratio="4 / 3" />
+              <p v-if="photo.caption" class="caption">{{ photo.caption }}</p>
+              <p v-else class="caption is-empty">写下这张照片的故事…</p>
+              <p v-if="photo.place || photo.tags.length" class="card-meta">
+                <span v-if="photo.place">{{ photo.place }}</span>
+                <span v-if="photo.place && photo.tags.length" class="dot">·</span>
+                <span v-if="photo.tags.length">{{ photo.tags.join(' · ') }}</span>
+              </p>
+            </button>
+          </div>
+        </section>
       </div>
 
       <EmptyState
@@ -140,7 +194,12 @@ async function onFiles(event: Event): Promise<void> {
       </div>
     </Transition>
 
-    <PhotoLightbox v-if="active" :photo="active" @close="active = null" />
+    <PhotoViewer
+      v-if="activeIndex !== null"
+      :photos="list"
+      :start-index="activeIndex"
+      @close="activeIndex = null"
+    />
   </div>
 </template>
 
@@ -227,18 +286,68 @@ async function onFiles(event: Event): Promise<void> {
   font-weight: 600;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
   padding: 0 20px;
 }
 
-.grid-item {
+.day-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.day-title {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.day-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card {
   display: block;
+  width: 100%;
+  text-align: left;
   padding: 0;
-  border-radius: var(--r-md);
-  overflow: hidden;
+}
+
+.card .caption {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.card .caption.is-empty {
+  color: var(--muted-soft);
+}
+
+.card-meta {
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.dot {
+  margin: 0 5px;
+  color: var(--line-strong);
 }
 
 .hidden-input {

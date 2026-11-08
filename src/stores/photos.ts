@@ -79,6 +79,8 @@ export const usePhotosStore = defineStore('photos', () => {
           tripId,
           thumbnail: processed.thumb,
           image: processed.full,
+          width: processed.width,
+          height: processed.height,
           takenAt: exif.takenAt ?? (file.lastModified || Date.now()),
           lat: exif.lat,
           lng: exif.lng,
@@ -100,17 +102,22 @@ export const usePhotosStore = defineStore('photos', () => {
     return { added, failed }
   }
 
-  async function remove(id: string): Promise<void> {
-    await deletePhoto(id)
-    photos.value = photos.value.filter((photo) => photo.id !== id)
+  async function updatePhoto(id: string, patch: Partial<Photo>): Promise<Photo | undefined> {
+    const photo = photos.value.find((item) => item.id === id)
+    if (!photo) return undefined
+    const next: Photo = { ...photo, ...patch }
+    await putPhoto(next)
+    photos.value = photos.value.map((item) => (item.id === id ? next : item))
+    return next
   }
 
   async function updateCaption(id: string, caption: string): Promise<void> {
-    const photo = photos.value.find((item) => item.id === id)
-    if (!photo) return
-    const next: Photo = { ...photo, caption }
-    await putPhoto(next)
-    photos.value = photos.value.map((item) => (item.id === id ? next : item))
+    await updatePhoto(id, { caption })
+  }
+
+  async function remove(id: string): Promise<void> {
+    await deletePhoto(id)
+    photos.value = photos.value.filter((photo) => photo.id !== id)
   }
 
   return {
@@ -124,7 +131,8 @@ export const usePhotosStore = defineStore('photos', () => {
     coverForTrip,
     ordered,
     importFiles,
-    remove,
+    updatePhoto,
     updateCaption,
+    remove,
   }
 })
