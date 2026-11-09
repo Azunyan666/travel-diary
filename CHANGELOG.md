@@ -2,6 +2,19 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.4.3] - 2026-11-09
+
+### 修复
+
+- **Android 返回键直接退出应用**：Capacitor 默认返回行为在 hash 路由下判断不出上一级。现在通过 `@capacitor/app` 接管 `backButton`：
+  - 子页面 → 回上一级，没有历史则回首页
+  - Tab 页 → 不在「足迹」时切回足迹，在足迹时退出应用
+
+### 变更
+
+- Android `versionCode 403` / `versionName 0.4.3`
+- 新增依赖 `@capacitor/app`
+
 ## [0.4.2] - 2026-11-09
 
 ### 修复
