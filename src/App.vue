@@ -6,13 +6,17 @@ import { App as NativeApp } from '@capacitor/app'
 import type { PluginListenerHandle } from '@capacitor/core'
 import TabBar from '@/components/TabBar.vue'
 import ToastHost from '@/components/ToastHost.vue'
+import UpdateSheet from '@/components/UpdateSheet.vue'
+import { runBackGuard } from '@/lib/backGuard'
 import { useTripsStore } from '@/stores/trips'
 import { usePhotosStore } from '@/stores/photos'
+import { useUpdateStore } from '@/stores/update'
 
 const route = useRoute()
 const router = useRouter()
 const trips = useTripsStore()
 const photos = usePhotosStore()
+const update = useUpdateStore()
 
 let backHandle: PluginListenerHandle | null = null
 
@@ -21,11 +25,15 @@ onMounted(async () => {
   void photos.init()
   // 申请持久化存储，降低浏览器回收数据的概率
   void navigator.storage?.persist?.()
+  // 启动时静默检查更新（6 小时一次）
+  void update.check()
 
   if (!Capacitor.isNativePlatform()) return
 
-  // Android 原生返回键：接管路由返回，而不是直接退出接 Activity
+  // Android 原生返回键：先关弹层/查看器，再按路由返回
   backHandle = await NativeApp.addListener('backButton', () => {
+    if (runBackGuard()) return
+
     const current = router.currentRoute.value
 
     if (!current.meta.tab) {
@@ -57,5 +65,6 @@ onBeforeUnmount(async () => {
 
     <TabBar v-if="route.meta.tab" />
     <ToastHost />
+    <UpdateSheet />
   </div>
 </template>

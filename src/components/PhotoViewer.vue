@@ -5,6 +5,7 @@ import { usePhotosStore } from '@/stores/photos'
 import { useObjectUrl } from '@/lib/useObjectUrl'
 import { fmtStamp } from '@/lib/format'
 import { toast } from '@/lib/toast'
+import { registerBackGuard } from '@/lib/backGuard'
 import AppIcon from '@/components/AppIcon.vue'
 
 const props = defineProps<{
@@ -81,8 +82,21 @@ function onKey(event: KeyboardEvent): void {
   else if (event.key === 'Escape') emit('close')
 }
 
-onMounted(() => window.addEventListener('keydown', onKey))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+let unregisterBack: (() => void) | null = null
+
+onMounted(() => {
+  window.addEventListener('keydown', onKey)
+  unregisterBack = registerBackGuard(() => {
+    emit('close')
+    return true
+  })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKey)
+  unregisterBack?.()
+  unregisterBack = null
+})
 
 function toggleTag(tag: string): void {
   const i = tags.value.indexOf(tag)

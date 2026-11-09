@@ -7,6 +7,7 @@ import MapCanvas from '@/components/MapCanvas.vue'
 import TripCard from '@/components/TripCard.vue'
 import { useTripsStore } from '@/stores/trips'
 import { usePhotosStore } from '@/stores/photos'
+import { useUpdateStore } from '@/stores/update'
 import { PROVINCE_TOTAL, normalizeProvince } from '@/lib/provinces'
 import { daysBetween, fmtMD } from '@/lib/format'
 import { byStartDateDesc } from '@/lib/sort'
@@ -15,6 +16,7 @@ import type { Trip } from '@/types/models'
 const router = useRouter()
 const trips = useTripsStore()
 const photos = usePhotosStore()
+const update = useUpdateStore()
 
 const year = new Date().getFullYear()
 
@@ -82,6 +84,15 @@ function createForProvince(): void {
         {{ litCount ? `已经点亮 ${litCount} 个地方` : '去过的地方，会一点一点亮起来。' }}
       </p>
     </header>
+
+    <button v-if="update.available" class="update-banner card" type="button" @click="update.open()">
+      <span class="update-badge"><AppIcon name="refresh" :size="16" /></span>
+      <span class="update-copy">
+        <span class="update-title">发现新版本 v{{ update.info?.latest }}</span>
+        <span class="update-sub">点这里查看更新内容</span>
+      </span>
+      <AppIcon name="chevron" :size="16" />
+    </button>
 
     <section class="map-card">
       <MapCanvas :visits="visits" :recent="recentProvince" @select="onSelect" />
@@ -401,5 +412,46 @@ function createForProvince(): void {
   color: var(--forest);
   font-size: 14px;
   font-weight: 600;
+}
+.update-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  text-align: left;
+  border: 1px solid rgba(222, 106, 62, 0.22);
+  background: var(--clay-soft);
+}
+
+.update-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--clay);
+  flex: none;
+}
+
+.update-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.update-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.update-sub {
+  font-size: 11px;
+  color: var(--muted);
 }
 </style>

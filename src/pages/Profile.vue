@@ -9,12 +9,14 @@ import { loadDemoData } from '@/lib/demo'
 import { APP_VERSION } from '@/lib/version'
 import { useTripsStore } from '@/stores/trips'
 import { usePhotosStore } from '@/stores/photos'
+import { useUpdateStore } from '@/stores/update'
 import type { IconName } from '@/types/icons'
 
 const year = new Date().getFullYear()
 const router = useRouter()
 const trips = useTripsStore()
 const photos = usePhotosStore()
+const update = useUpdateStore()
 const lastBackupAt = ref<number | undefined>()
 
 const needsBackup = computed(() => {
@@ -41,18 +43,29 @@ const stats = computed(() => [
 const menus: Array<{
   label: string
   icon: IconName
-  action: 'backup' | 'demo' | 'about' | 'repo'
+  action: 'backup' | 'demo' | 'check' | 'about' | 'repo'
 }> = [
   { label: '数据备份与导出', icon: 'download', action: 'backup' },
   { label: '添加示例数据', icon: 'image', action: 'demo' },
+  { label: '检查更新', icon: 'refresh', action: 'check' },
   { label: '关于行迹', icon: 'info', action: 'about' },
   { label: '开源仓库', icon: 'code', action: 'repo' },
 ]
 
-function onMenu(action: 'backup' | 'demo' | 'about' | 'repo'): void {
+function onMenu(action: 'backup' | 'demo' | 'check' | 'about' | 'repo'): void {
   if (action === 'backup') router.push('/backup')
-  else if (action === 'about') toast(`行迹 v${APP_VERSION} · 本地优先的旅行日记`)
   else if (action === 'demo') void addDemo()
+  else if (action === 'check') void checkUpdate()
+  else if (action === 'about') toast(`行迹 v${APP_VERSION} · 本地优先的旅行日记`)
+}
+
+async function checkUpdate(): Promise<void> {
+  await update.check(true)
+  if (update.info) {
+    update.open()
+  } else {
+    toast('已经是最新版本')
+  }
 }
 
 async function addDemo(): Promise<void> {

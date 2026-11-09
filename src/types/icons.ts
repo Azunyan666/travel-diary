@@ -13,3 +13,4 @@ export type IconName =
   | 'close'
   | 'edit'
   | 'trash'
+  | 'refresh'

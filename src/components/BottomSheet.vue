@@ -1,7 +1,31 @@
 <script setup lang="ts">
-defineProps<{ open: boolean }>()
+import { onBeforeUnmount, watch } from 'vue'
+import { registerBackGuard } from '@/lib/backGuard'
+
+const props = defineProps<{ open: boolean }>()
 
 const emit = defineEmits<{ close: [] }>()
+
+let unregister: (() => void) | null = null
+
+function sync(open: boolean): void {
+  if (open && !unregister) {
+    unregister = registerBackGuard(() => {
+      emit('close')
+      return true
+    })
+  } else if (!open && unregister) {
+    unregister()
+    unregister = null
+  }
+}
+
+watch(() => props.open, sync, { immediate: true })
+
+onBeforeUnmount(() => {
+  unregister?.()
+  unregister = null
+})
 </script>
 
 <template>
