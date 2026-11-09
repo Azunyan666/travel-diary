@@ -11,7 +11,7 @@
 
 **在线体验**：<https://azunyan666.github.io/travel-diary/>
 
-> 当前版本 **v0.4.1**：Web 端功能完整（记录、标注、地图、备份），并已通过 Capacitor 打包成 Android APK（见 [路线图](./docs/ROADMAP.md)）。
+> 当前版本 **v0.4.4**：Web 端功能完整（记录、标注、地图、备份），Android APK 支持应用内更新检查与系统返回键分层返回（见 [路线图](./docs/ROADMAP.md)）。
 
 ![行迹 · 足迹地图](docs/screenshots/home.png)
 
@@ -47,6 +47,8 @@
 | zip 备份导出、合并/覆盖导入、备份提醒 | ✅ v0.4.0 |
 | 示例数据（3 次旅行 / 7 张照片） | ✅ v0.4.0 |
 | Android APK（Capacitor 套壳、品牌图标、自动出包） | ✅ v0.4.1 |
+| 应用内更新检查、更新弹层、一键下载 APK | ✅ v0.4.4 |
+| Android 返回键分层返回、优先关闭弹层 | ✅ v0.4.4 |
 | 世界地图、年度回顾 | 📋 v0.5+ |
 
 ## 技术栈
@@ -129,7 +131,7 @@ public/            静态资源、PWA 图标、地图 GeoJSON
 
 ## 路线图
 
-见 [docs/ROADMAP.md](./docs/ROADMAP.md)。下一个版本 v0.5.0 的目标是：世界地图、年度回顾、Android APK。
+见 [docs/ROADMAP.md](./docs/ROADMAP.md)。下一个版本 v0.5.0 的目标是：世界地图、年度回顾。
 
 ## 贡献
 

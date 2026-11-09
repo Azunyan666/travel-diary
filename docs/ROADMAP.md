@@ -40,6 +40,12 @@
 - GitHub Actions 自动出包（tag → Release APK）
 - 正式签名流程（release.keystore + GitHub Secrets）
 
+## v0.4.2 – v0.4.4 · Android 打磨（已完成）
+
+- 修复 APK 白屏（相对路径 base、关闭 WebView 内的 Service Worker）
+- 接管系统返回键：子页面回上一级、Tab 页回足迹、优先关闭照片查看器与弹层
+- 应用内更新检查（GitHub Releases）与更新弹层
+
 ## v0.5.0 · 世界地图（可选）
 
 - 国家边界 GeoJSON 与切换
