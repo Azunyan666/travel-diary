@@ -16,7 +16,10 @@ src/                        Web 代码（与 PWA 共用）
 
 ```bash
 npm install
-npm run build          # 类型检查 + 构建 dist
+
+# Capacitor 构建必须用相对路径，否则 WebView 里资源会 404（白屏）
+CAPACITOR=1 npm run build
+
 npx cap sync android   # 把 dist 同步进 Android 工程
 cd android
 ./gradlew assembleDebug   # 或 assembleRelease（需要签名配置）

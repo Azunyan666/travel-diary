@@ -2,6 +2,18 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.4.2] - 2026-11-09
+
+### 修复
+
+- **Android 白屏**：APK 内 `index.html` 仍指向 `/travel-diary/assets/...`，而 Capacitor 的本地服务在 `/`，导致 JS/CSS 全部 404。现在 Capacitor 构建使用相对路径 `./`
+- APK 内不再注册 Service Worker，避免 WebView 缓存旧资源、升级后出现旧版本
+
+### 变更
+
+- Android `versionCode 402` / `versionName 0.4.2`
+- 构建 APK 前需要 `CAPACITOR=1 npm run build`（工作流已配置）
+
 ## [0.4.1] - 2026-11-08
 
 ### 新增

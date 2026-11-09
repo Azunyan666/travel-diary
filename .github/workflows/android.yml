@@ -38,7 +38,12 @@ jobs:
           ls "$SDK/platforms" "$SDK/build-tools" || true
 
       - run: npm ci
-      - run: npm run build
+
+      - name: Build web (Capacitor, relative base)
+        env:
+          CAPACITOR: '1'
+        run: npm run build
+
       - run: npx cap sync android
 
       - name: Prepare signing
