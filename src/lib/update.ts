@@ -37,6 +37,17 @@ interface ReleasePayload {
   assets?: ReleaseAsset[]
 }
 
+/** 去掉 Release notes 里的 Markdown 标记，只留可读文本 */
+function cleanNotes(raw: string): string {
+  return raw
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/\*\*/g, '')
+    .replace(/^\s*Full Changelog:.*$/gim, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .slice(0, 500)
+}
+
 export async function fetchLatestUpdate(): Promise<UpdateInfo | null> {
   try {
     const response = await fetch(RELEASE_API, {
@@ -60,7 +71,7 @@ export async function fetchLatestUpdate(): Promise<UpdateInfo | null> {
       latest,
       url: apk?.browser_download_url ?? data.html_url ?? '',
       pageUrl: data.html_url ?? '',
-      notes: String(data.body ?? '').slice(0, 600),
+      notes: cleanNotes(String(data.body ?? '')),
     }
   } catch {
     return null
