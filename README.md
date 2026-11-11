@@ -11,13 +11,15 @@
 
 **在线体验**：<https://azunyan666.github.io/travel-diary/>
 
-> 当前版本 **v0.4.4**：Web 端功能完整（记录、标注、地图、备份），Android APK 支持应用内更新检查与系统返回键分层返回（见 [路线图](./docs/ROADMAP.md)）。
+> 当前版本 **v0.5.0**：Web 端功能完整（记录、标注、地图、备份），地图支持中国 / 世界切换；Android APK 支持应用内更新与系统返回键分层返回（见 [路线图](./docs/ROADMAP.md)）。
 
 ![行迹 · 足迹地图](docs/screenshots/home.png)
 
 | 旅行时间线 | 照片标注 | 点省份 |
 |---|---|---|
 | ![时间线](docs/screenshots/timeline.png) | ![标注](docs/screenshots/viewer.png) | ![省份抽屉](docs/screenshots/map-sheet.png) |
+
+![世界地图](docs/screenshots/world.png)
 
 ![数据备份](docs/screenshots/backup.png)
 
@@ -49,7 +51,8 @@
 | Android APK（Capacitor 套壳、品牌图标、自动出包） | ✅ v0.4.1 |
 | 应用内更新检查、更新弹层、一键下载 APK | ✅ v0.4.4 |
 | Android 返回键分层返回、优先关闭弹层 | ✅ v0.4.4 |
-| 世界地图、年度回顾 | 📋 v0.5+ |
+| 世界地图点亮（173 个国家/地区，中/英/ISO 匹配） | ✅ v0.5.0 |
+| 年度回顾 | 📋 v0.6+ |
 
 ## 技术栈
 
@@ -120,6 +123,7 @@ public/            静态资源、PWA 图标、地图 GeoJSON
 ## 地图数据
 
 - `public/geo/china.json` 由公开的省级边界数据简化而来（34 个省级行政区，约 185KB），只保留名称、中心点与边界坐标
+- `public/geo/world.json` 由 Natural Earth 国家边界（public domain，经 world-atlas 整理）简化而来（173 个国家/地区，约 140KB）；中文国名来自 [world-countries](https://github.com/mledoze/countries)（ODbL）
 - 地图用于个人足迹展示，不是标准地图；如需公开发布或商用，请使用带审图号的标准地图服务
 - 渲染全部在本地 canvas 完成，不请求在线瓦片服务，可离线使用
 
@@ -131,7 +135,7 @@ public/            静态资源、PWA 图标、地图 GeoJSON
 
 ## 路线图
 
-见 [docs/ROADMAP.md](./docs/ROADMAP.md)。下一个版本 v0.5.0 的目标是：世界地图、年度回顾。
+见 [docs/ROADMAP.md](./docs/ROADMAP.md)。下一个版本 v0.6.0 的目标是：年度回顾长图。
 
 ## 贡献
 

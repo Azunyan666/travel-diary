@@ -9,9 +9,12 @@ import { useTripsStore } from '@/stores/trips'
 import { usePhotosStore } from '@/stores/photos'
 import { useUpdateStore } from '@/stores/update'
 import { PROVINCE_TOTAL, normalizeProvince } from '@/lib/provinces'
+import { WORLD_TOTAL, countryKey } from '@/lib/countries'
 import { daysBetween, fmtMD } from '@/lib/format'
 import { byStartDateDesc } from '@/lib/sort'
 import type { Trip } from '@/types/models'
+
+type Mode = 'china' | 'world'
 
 const router = useRouter()
 const trips = useTripsStore()
@@ -19,11 +22,15 @@ const photos = usePhotosStore()
 const update = useUpdateStore()
 
 const year = new Date().getFullYear()
+const mode = ref<Mode>('china')
 
 const visits = computed<Record<string, number>>(() => {
   const map: Record<string, number> = {}
   for (const trip of trips.trips) {
-    const key = normalizeProvince(trip.province ?? '')
+    const key =
+      mode.value === 'china'
+        ? normalizeProvince(trip.province ?? '')
+        : countryKey(trip.country)
     if (!key) continue
     map[key] = (map[key] ?? 0) + 1
   }
@@ -31,35 +38,53 @@ const visits = computed<Record<string, number>>(() => {
 })
 
 const litCount = computed(() => Object.keys(visits.value).length)
+const total = computed(() => (mode.value === 'china' ? PROVINCE_TOTAL : WORLD_TOTAL))
 
-const recentProvince = computed(() => {
+const recentKey = computed(() => {
   const sorted = [...trips.trips].sort(byStartDateDesc)
-  return sorted.length ? normalizeProvince(sorted[0].province ?? '') : ''
+  if (!sorted.length) return ''
+  return mode.value === 'china'
+    ? normalizeProvince(sorted[0].province ?? '')
+    : countryKey(sorted[0].country)
 })
 
 const stats = computed(() => [
   { label: '次旅行', value: trips.trips.length },
   {
     label: '天在路上',
-    value: trips.trips.reduce((total, trip) => total + daysBetween(trip.startDate, trip.endDate), 0),
+    value: trips.trips.reduce((totalDays, trip) => totalDays + daysBetween(trip.startDate, trip.endDate), 0),
   },
   { label: '张照片', value: photos.photos.length },
 ])
 
 const recentTrips = computed(() => [...trips.trips].sort(byStartDateDesc).slice(0, 3))
 
-const selected = ref<string | null>(null)
+const selected = ref<{ key: string; label: string } | null>(null)
 const sheetOpen = ref(false)
 
 const selectedTrips = computed<Trip[]>(() => {
   if (!selected.value) return []
+  const key = selected.value.key
   return trips.trips
-    .filter((trip) => normalizeProvince(trip.province ?? '') === selected.value)
+    .filter((trip) =>
+      mode.value === 'china'
+        ? normalizeProvince(trip.province ?? '') === key
+        : countryKey(trip.country) === key,
+    )
     .sort(byStartDateDesc)
 })
 
-function onSelect(name: string): void {
-  selected.value = normalizeProvince(name)
+function switchMode(next: Mode): void {
+  if (mode.value === next) return
+  mode.value = next
+  sheetOpen.value = false
+}
+
+function onSelect(payload: { id: string; name: string }): void {
+  selected.value = {
+    key: payload.id,
+    label: mode.value === 'china' ? payload.id : payload.name,
+  }
   sheetOpen.value = true
 }
 
@@ -68,10 +93,14 @@ function openTrip(trip: Trip): void {
   router.push(`/trip/${trip.id}`)
 }
 
-function createForProvince(): void {
-  const province = selected.value
+function createForSelected(): void {
+  const label = selected.value?.label
   sheetOpen.value = false
-  router.push({ path: '/trip/new', query: province ? { province } : {} })
+  if (mode.value === 'china') {
+    router.push({ path: '/trip/new', query: label ? { province: label } : {} })
+  } else {
+    router.push({ path: '/trip/new', query: label ? { country: label } : {} })
+  }
 }
 </script>
 
@@ -94,10 +123,29 @@ function createForProvince(): void {
       <AppIcon name="chevron" :size="16" />
     </button>
 
-    <section class="map-card">
-      <MapCanvas :visits="visits" :recent="recentProvince" @select="onSelect" />
+    <div class="mode-switch" role="tablist" aria-label="地图范围">
+      <button
+        type="button"
+        class="mode-btn"
+        :class="{ 'is-on': mode === 'china' }"
+        @click="switchMode('china')"
+      >
+        中国
+      </button>
+      <button
+        type="button"
+        class="mode-btn"
+        :class="{ 'is-on': mode === 'world' }"
+        @click="switchMode('world')"
+      >
+        世界
+      </button>
+    </div>
 
-      <span class="chip">{{ litCount }} / {{ PROVINCE_TOTAL }}</span>
+    <section class="map-card">
+      <MapCanvas :mode="mode" :visits="visits" :recent="recentKey" @select="onSelect" />
+
+      <span class="chip">{{ litCount }} / {{ total }}</span>
 
       <div class="legend">
         <span class="legend-item"><i class="dot unlit" />未去过</span>
@@ -145,7 +193,7 @@ function createForProvince(): void {
     <BottomSheet :open="sheetOpen" @close="sheetOpen = false">
       <div class="sheet-head">
         <div>
-          <p class="sheet-name">{{ selected }}</p>
+          <p class="sheet-name">{{ selected?.label }}</p>
           <p class="sheet-meta">
             {{ selectedTrips.length ? `${selectedTrips.length} 次旅行` : '还没去过这里' }}
           </p>
@@ -168,7 +216,7 @@ function createForProvince(): void {
         </button>
       </div>
 
-      <button v-else class="sheet-empty-btn" type="button" @click="createForProvince">
+      <button v-else class="sheet-empty-btn" type="button" @click="createForSelected">
         记一次去这里的旅行
       </button>
     </BottomSheet>
@@ -176,6 +224,31 @@ function createForProvince(): void {
 </template>
 
 <style scoped>
+.mode-switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 12px;
+  border-radius: var(--r-full);
+  background: rgba(31, 36, 33, 0.05);
+}
+
+.mode-btn {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--r-full);
+  font-size: 13px;
+  color: var(--muted);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.mode-btn.is-on {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(31, 36, 33, 0.08);
+}
+
 .map-card {
   position: relative;
   height: 340px;
@@ -413,6 +486,7 @@ function createForProvince(): void {
   font-size: 14px;
   font-weight: 600;
 }
+
 .update-banner {
   width: 100%;
   display: flex;

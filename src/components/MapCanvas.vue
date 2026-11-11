@@ -3,7 +3,9 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { normalizeProvince } from '@/lib/provinces'
 
 interface GeoFeature {
-  name: string
+  name?: string
+  nameZh?: string
+  iso?: string
   center?: [number, number]
   geometry: {
     type: 'Polygon' | 'MultiPolygon'
@@ -12,24 +14,33 @@ interface GeoFeature {
 }
 
 interface Feature {
+  id: string
   name: string
   center?: [number, number]
   rings: Array<Array<[number, number]>>
 }
 
-const props = defineProps<{
-  visits: Record<string, number>
-  recent?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    visits: Record<string, number>
+    recent?: string
+    mode?: 'china' | 'world'
+  }>(),
+  { mode: 'china', recent: '' },
+)
 
-const emit = defineEmits<{ select: [name: string] }>()
+const emit = defineEmits<{
+  select: [payload: { id: string; name: string }]
+}>()
 
 const root = ref<HTMLDivElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
 const status = ref<'loading' | 'ready' | 'error'>('loading')
 
-const BOUNDS = { minLng: 73, maxLng: 136, minLat: 17, maxLat: 54 }
-const PAD = 10
+const BOUNDS = {
+  china: { minLng: 73, maxLng: 136, minLat: 17, maxLat: 54 },
+  world: { minLng: -180, maxLng: 180, minLat: -56, maxLat: 84 },
+}
 
 const FILL = {
   unvisited: '#EFE8D9',
@@ -43,21 +54,30 @@ let transform = { scale: 1, offsetX: 0, offsetY: 0 }
 let observer: ResizeObserver | null = null
 
 const mercX = (lng: number): number => (lng * Math.PI) / 180
-const mercY = (lat: number): number => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
+const mercY = (lat: number): number => {
+  const clamped = Math.max(-85, Math.min(85, lat))
+  return Math.log(Math.tan(Math.PI / 4 + (clamped * Math.PI) / 360))
+}
 
-const X0 = mercX(BOUNDS.minLng)
-const X1 = mercX(BOUNDS.maxLng)
-const Y0 = mercY(BOUNDS.minLat)
-const Y1 = mercY(BOUNDS.maxLat)
+function boundsFor(mode: 'china' | 'world') {
+  return BOUNDS[mode]
+}
 
 function fit(width: number, height: number): void {
-  const spanX = X1 - X0
-  const spanY = Y1 - Y0
-  const scale = Math.min((width - PAD * 2) / spanX, (height - PAD * 2) / spanY)
+  const bounds = boundsFor(props.mode)
+  const x0 = mercX(bounds.minLng)
+  const x1 = mercX(bounds.maxLng)
+  const y0 = mercY(bounds.minLat)
+  const y1 = mercY(bounds.maxLat)
+  const pad = props.mode === 'world' ? 6 : 10
+
+  const spanX = x1 - x0
+  const spanY = y1 - y0
+  const scale = Math.min((width - pad * 2) / spanX, (height - pad * 2) / spanY)
   transform = {
     scale,
-    offsetX: (width - spanX * scale) / 2 - X0 * scale,
-    offsetY: (height - spanY * scale) / 2 + Y1 * scale,
+    offsetX: (width - spanX * scale) / 2 - x0 * scale,
+    offsetY: (height - spanY * scale) / 2 + y1 * scale,
   }
 }
 
@@ -78,8 +98,8 @@ function toRings(geometry: GeoFeature['geometry']): Array<Array<[number, number]
   return (geometry.coordinates as number[][][][]).flatMap((polygon) => polygon.map(convert))
 }
 
-function fillFor(name: string): string {
-  const count = props.visits[normalizeProvince(name)] ?? 0
+function fillFor(id: string): string {
+  const count = props.visits[id] ?? 0
   if (count <= 0) return FILL.unvisited
   if (count === 1) return FILL.once
   if (count <= 3) return FILL.twice
@@ -113,54 +133,54 @@ function draw(): void {
       })
       ctx.closePath()
     }
-    ctx.fillStyle = fillFor(feature.name)
+    ctx.fillStyle = fillFor(feature.id)
     ctx.fill('evenodd')
-    ctx.lineWidth = 0.7
+    ctx.lineWidth = props.mode === 'world' ? 0.45 : 0.7
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)'
     ctx.stroke()
   }
 
-  const recentFeature = props.recent
-    ? features.find((feature) => normalizeProvince(feature.name) === props.recent)
-    : undefined
-  if (recentFeature?.center) {
-    const [x, y] = toScreen(recentFeature.center[0], recentFeature.center[1])
-    ctx.beginPath()
-    ctx.arc(x, y, 7, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(222, 106, 62, 0.22)'
-    ctx.fill()
-    ctx.beginPath()
-    ctx.arc(x, y, 3.2, 0, Math.PI * 2)
-    ctx.fillStyle = '#DE6A3E'
-    ctx.fill()
+  if (props.recent) {
+    const recentFeature = features.find((feature) => feature.id === props.recent)
+    if (recentFeature?.center) {
+      const [x, y] = toScreen(recentFeature.center[0], recentFeature.center[1])
+      ctx.beginPath()
+      ctx.arc(x, y, 7, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(222, 106, 62, 0.22)'
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(x, y, 3.2, 0, Math.PI * 2)
+      ctx.fillStyle = '#DE6A3E'
+      ctx.fill()
+    }
   }
 }
 
-function hitTest(x: number, y: number): string | null {
+function hitTest(x: number, y: number): Feature | null {
   for (const feature of features) {
     let inside = false
     for (const ring of feature.rings) {
       for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
         const [x1, y1] = toScreen(ring[i][0], ring[i][1])
         const [x2, y2] = toScreen(ring[j][0], ring[j][1])
-        if (y1 > y !== y2 > y && x < ((x2 - x1) * (y - y1)) / (y2 - y1) + x1) {
+        if ((y1 > y) !== (y2 > y) && x < ((x2 - x1) * (y - y1)) / (y2 - y1) + x1) {
           inside = !inside
         }
       }
     }
-    if (inside) return feature.name
+    if (inside) return feature
   }
 
-  // 点击容差：没点中时找最近的省份中心
-  let nearest: string | null = null
-  let minDistance = 18
+  // 点击容差：找最近的区域中心
+  let nearest: Feature | null = null
+  let minDistance = props.mode === 'world' ? 12 : 18
   for (const feature of features) {
     if (!feature.center) continue
     const [cx, cy] = toScreen(feature.center[0], feature.center[1])
     const distance = Math.hypot(cx - x, cy - y)
     if (distance < minDistance) {
       minDistance = distance
-      nearest = feature.name
+      nearest = feature
     }
   }
   return nearest
@@ -170,20 +190,33 @@ function onPointerUp(event: PointerEvent): void {
   const el = canvas.value
   if (!el || status.value !== 'ready') return
   const rect = el.getBoundingClientRect()
-  const name = hitTest(event.clientX - rect.left, event.clientY - rect.top)
-  if (name) emit('select', name)
+  const feature = hitTest(event.clientX - rect.left, event.clientY - rect.top)
+  if (feature) emit('select', { id: feature.id, name: feature.name })
 }
 
 async function load(): Promise<void> {
+  status.value = 'loading'
+  features = []
   try {
-    const response = await fetch(`${import.meta.env.BASE_URL}geo/china.json`)
+    const file = props.mode === 'world' ? 'world' : 'china'
+    const response = await fetch(`${import.meta.env.BASE_URL}geo/${file}.json`)
     if (!response.ok) throw new Error(String(response.status))
+
     const data = (await response.json()) as { features: GeoFeature[] }
-    features = data.features.map((feature) => ({
-      name: feature.name,
-      center: feature.center,
-      rings: toRings(feature.geometry),
-    }))
+    features = data.features
+      .map((feature) => {
+        const rawName = feature.name ?? ''
+        const id =
+          props.mode === 'world' ? (feature.iso ?? '') : normalizeProvince(rawName)
+        return {
+          id,
+          name: feature.nameZh || rawName || id,
+          center: feature.center,
+          rings: toRings(feature.geometry),
+        }
+      })
+      .filter((feature) => feature.id && feature.rings.length)
+
     status.value = 'ready'
     draw()
   } catch (error) {
@@ -202,6 +235,13 @@ onBeforeUnmount(() => {
   observer?.disconnect()
   observer = null
 })
+
+watch(
+  () => props.mode,
+  () => {
+    void load()
+  },
+)
 
 watch(() => [props.visits, props.recent], draw, { deep: true })
 </script>
